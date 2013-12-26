@@ -1,13 +1,9 @@
 #pragma once
 
 #include "Object.hpp"
-#include <set>
 
-namespace std
-{
-template <class T>
-class vector;
-}
+#include <set>
+#include <memory>
 
 namespace gl
 {
@@ -21,6 +17,7 @@ namespace gl
 		void attachShader(const T&);
 		void detachShader(const T&);
 		bool link();
+		std::auto_ptr<GLchar> infoLog();
 	private:
 		std::set<T> _shaders;
 	};
@@ -62,5 +59,15 @@ namespace gl
 		GLint status;
 		glGetProgramiv(_id, GL_LINK_STATUS, &status);
 		return status != GL_FALSE;
+	}
+
+	template <class T>
+	std::auto_ptr<GLchar> Program<T>::infoLog()
+	{
+		GLint logLength;
+		glGetProgramiv(appData->program->identifier(), GL_INFO_LOG_LENGTH, &logLength);
+		GLchar* msg = new GLchar[logLength + 1];
+		glGetProgramInfoLog(appData->program->identifier(), logLength, nullptr, msg);
+		return std::auto_ptr<GLchar>(msg);
 	}
 }

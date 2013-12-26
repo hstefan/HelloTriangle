@@ -2,7 +2,10 @@
 
 #include <string>
 #include <fstream>
+#include <memory>
+
 #include "Object.hpp"
+
 namespace gl
 {
 	template <class T = GLuint>
@@ -14,6 +17,7 @@ namespace gl
 		~Shader();
 		bool compile();
 		void source(const char* filename);
+		std::auto_ptr<GLchar> infoLog();
 	};
 
 	template <class T>
@@ -55,5 +59,15 @@ namespace gl
 			);
 		const char* rawContent = content.c_str();
 		glShaderSource(_id, 1, &rawContent, nullptr);
+	}
+
+	template <class T>
+	std::auto_ptr<GLchar> Shader<T>::infoLog()
+	{
+		GLint infoLength;
+		glGetShaderiv(_id, GL_INFO_LOG_LENGTH, &infoLength);
+		GLchar* logMsg = new GLchar[infoLength + 1];
+		glGetShaderInfoLog(_id, infoLength, nullptr, logMsg);
+		return std::auto_ptr<GLchar>(logMsg);
 	}
 }

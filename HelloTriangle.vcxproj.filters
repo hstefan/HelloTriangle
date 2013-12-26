@@ -38,9 +38,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\glfw3.dll" />
+    <None Include="res\fragment.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\glfw3.lib" />
     <Library Include="lib\glfw3dll.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="res\vertex.glsl" />
   </ItemGroup>
 </Project>

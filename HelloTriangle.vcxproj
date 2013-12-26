@@ -21,6 +21,7 @@
     <ClInclude Include="include\GLFW\glfw3native.h" />
     <ClInclude Include="src\gl\Object.hpp" />
     <ClInclude Include="src\gl\Program.hpp" />
+    <ClInclude Include="src\gl\Shader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\glfw3.dll" />

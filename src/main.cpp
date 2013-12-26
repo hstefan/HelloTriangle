@@ -4,14 +4,15 @@
 #include <fstream>
 
 #include "gl/Program.hpp"
+#include "gl/Shader.hpp"
 
 struct AppData
 {
-	gl::Program<GLuint> program;
+	gl::Program<GLuint>* program;
+	gl::Shader<GLuint>* vshader;
+	gl::Shader<GLuint>* fshader;
 	GLuint pbo;
 	GLuint vao;
-	GLuint vshader;
-	GLuint fshader;
 };
 
 AppData* appData;
@@ -67,7 +68,7 @@ void render(GLFWwindow* window)
 	glClearColor(0.f, 0.f, 0.f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(appData->program.identifier());
+	glUseProgram(appData->program->identifier());
 	glBindBuffer(GL_ARRAY_BUFFER, appData->pbo);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -87,55 +88,27 @@ void eventLoop(GLFWwindow* window)
 	}
 }
 
-GLuint createShader(GLenum shaderType, const char* filename)
-{
-	auto shader = glCreateShader(shaderType);
-	
-	std::ifstream file(filename);
-	std::string content(
-		(std::istreambuf_iterator<char>(file)),
-		(std::istreambuf_iterator<char>())
-	);
-	const char* rawContent = content.c_str();
-	glShaderSource(shader, 1, &rawContent, nullptr);
-	glCompileShader(shader);
-	GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE)
-	{
-		GLint infoLength;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLength);
-		GLchar* logMsg = new GLchar[infoLength + 1];
-		glGetShaderInfoLog(shader, infoLength, nullptr, logMsg);
-		fprintf(stderr, "Failed compiling %s shader: %s\n", filename, logMsg);
-		delete[] logMsg;
-	}
-	return shader;
-}
-
 void initApplication(GLFWwindow* window)
 {
 	appData = new AppData();
+	appData->program = new gl::Program<GLuint>();
+	
+	appData->vshader = new gl::Shader<GLuint>(GL_VERTEX_SHADER, "res/vertex.glsl");
+	if (!appData->vshader->compile())
+		fprintf(stderr, appData->vshader->infoLog().get());
 
-	appData->vshader = createShader(GL_VERTEX_SHADER, "res/vertex.glsl");
-	appData->fshader = createShader(GL_FRAGMENT_SHADER, "res/fragment.glsl");
+	appData->fshader = new gl::Shader<GLuint>(GL_FRAGMENT_SHADER, "res/fragment.glsl");
+	if (!appData->fshader->compile())
+		fprintf(stderr, appData->fshader->infoLog().get());
 
-	appData->program.attachShader(appData->vshader);
-	appData->program.attachShader(appData->fshader);
-	appData->program.link();
+	appData->program->attachShader(appData->vshader->identifier());
+	appData->program->attachShader(appData->fshader->identifier());
 
-	if (!appData->program.link())
-	{
-		GLint logLength;
-		glGetProgramiv(appData->program.identifier(), GL_INFO_LOG_LENGTH, &logLength);
-		GLchar* msg = new GLchar[logLength + 1];
-		glGetProgramInfoLog(appData->program.identifier(), logLength, nullptr, msg);
-		std::fprintf(stderr, "Link failure: %s\n", msg);
-		delete[] msg;
-	}
+	if (!appData->program->link())
+		std::fprintf(stderr, "Link failure: %s\n", appData->program->infoLog());
 
-	appData->program.detachShader(appData->vshader);
-	appData->program.detachShader(appData->fshader);
+	appData->program->detachShader(appData->vshader->identifier());
+	appData->program->detachShader(appData->fshader->identifier());
 	
 	const float vertexPositions[] = 
 		{

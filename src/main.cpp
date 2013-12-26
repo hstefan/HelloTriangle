@@ -101,14 +101,14 @@ void initApplication(GLFWwindow* window)
 	if (!appData->fshader->compile())
 		fprintf(stderr, appData->fshader->infoLog().get());
 
-	appData->program->attachShader(appData->vshader->identifier());
-	appData->program->attachShader(appData->fshader->identifier());
+	appData->program->attachShader(*appData->vshader);
+	appData->program->attachShader(*appData->fshader);
 
 	if (!appData->program->link())
 		std::fprintf(stderr, "Link failure: %s\n", appData->program->infoLog());
 
-	appData->program->detachShader(appData->vshader->identifier());
-	appData->program->detachShader(appData->fshader->identifier());
+	appData->program->detachShader(*appData->vshader);
+	appData->program->detachShader(*appData->fshader);
 	
 	const float vertexPositions[] = 
 		{

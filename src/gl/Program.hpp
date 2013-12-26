@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.hpp"
+#include "Shader.hpp"
 
 #include <set>
 #include <memory>
@@ -16,6 +17,8 @@ namespace gl
 
 		void attachShader(const T&);
 		void detachShader(const T&);
+		inline void attachShader(const Shader<T>&);
+		inline void detachShader(const Shader<T>&);
 		bool link();
 		std::auto_ptr<GLchar> infoLog();
 	private:
@@ -50,6 +53,18 @@ namespace gl
 	{
 		_shaders.erase(shader);
 		glDetachShader(_id, shader);
+	}
+
+	template <class T>
+	void Program<T>::attachShader(const Shader<T>& shader)
+	{
+		attachShader(shader.identifier());
+	}
+
+	template <class T>
+	void Program<T>::detachShader(const Shader<T>& shader)
+	{
+		detachShader(shader.identifier());
 	}
 
 	template <class T>

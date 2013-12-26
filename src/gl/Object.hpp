@@ -8,13 +8,13 @@ namespace gl
 	class Object
 	{
 	public:
-		inline const T& identifier();
+		inline const T& identifier() const;
 	protected:
 		T _id;
 	};
 
 	template <class T>
-	inline const T& Object<T>::identifier()
+	inline const T& Object<T>::identifier() const
 	{
 		return _id;
 	}

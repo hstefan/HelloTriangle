@@ -19,6 +19,8 @@
     <ClInclude Include="include\GL3\gl3w.h" />
     <ClInclude Include="include\GLFW\glfw3.h" />
     <ClInclude Include="include\GLFW\glfw3native.h" />
+    <ClInclude Include="src\gl\Object.hpp" />
+    <ClInclude Include="src\gl\Program.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\glfw3.dll" />

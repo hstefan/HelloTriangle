@@ -3,9 +3,11 @@
 #include <cstdio>
 #include <fstream>
 
+#include "gl/Program.hpp"
+
 struct AppData
 {
-	GLuint program;
+	gl::Program<GLuint> program;
 	GLuint pbo;
 	GLuint vao;
 	GLuint vshader;
@@ -65,7 +67,7 @@ void render(GLFWwindow* window)
 	glClearColor(0.f, 0.f, 0.f, 0.f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(appData->program);
+	glUseProgram(appData->program.identifier());
 	glBindBuffer(GL_ARRAY_BUFFER, appData->pbo);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -114,30 +116,27 @@ GLuint createShader(GLenum shaderType, const char* filename)
 void initApplication(GLFWwindow* window)
 {
 	appData = new AppData();
-	
-	appData->program = glCreateProgram();
+
 	appData->vshader = createShader(GL_VERTEX_SHADER, "res/vertex.glsl");
 	appData->fshader = createShader(GL_FRAGMENT_SHADER, "res/fragment.glsl");
 
-	glAttachShader(appData->program, appData->vshader);
-	glAttachShader(appData->program, appData->fshader);
-	glLinkProgram(appData->program);
+	appData->program.attachShader(appData->vshader);
+	appData->program.attachShader(appData->fshader);
+	appData->program.link();
 
-	GLint status;
-	glGetProgramiv(appData->program, GL_LINK_STATUS, &status);
-	if (status == GL_FALSE)
+	if (!appData->program.link())
 	{
 		GLint logLength;
-		glGetProgramiv(appData->program, GL_INFO_LOG_LENGTH, &logLength);
+		glGetProgramiv(appData->program.identifier(), GL_INFO_LOG_LENGTH, &logLength);
 		GLchar* msg = new GLchar[logLength + 1];
-		glGetProgramInfoLog(appData->program, logLength, nullptr, msg);
+		glGetProgramInfoLog(appData->program.identifier(), logLength, nullptr, msg);
 		std::fprintf(stderr, "Link failure: %s\n", msg);
 		delete[] msg;
 	}
-	
-	glDetachShader(appData->program, appData->vshader);
-	glDetachShader(appData->program, appData->fshader);
 
+	appData->program.detachShader(appData->vshader);
+	appData->program.detachShader(appData->fshader);
+	
 	const float vertexPositions[] = 
 		{
 			0.75f, 0.75f, 0.0f, 1.0f,
@@ -160,6 +159,7 @@ int main(int argc, char* argv [])
 	if (window)
 	{
 		initApplication(window);
+		gl::Program<GLuint> prog;
 		eventLoop(window);
 	}
 	glfwTerminate();

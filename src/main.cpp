@@ -5,13 +5,14 @@
 
 #include "gl/Program.hpp"
 #include "gl/Shader.hpp"
+#include "gl/BufferObject.hpp"
 
 struct AppData
 {
 	gl::Program<GLuint>* program;
 	gl::Shader<GLuint>* vshader;
 	gl::Shader<GLuint>* fshader;
-	GLuint pbo;
+	gl::BufferObject<GLuint>* pbo;
 	GLuint vao;
 };
 
@@ -69,7 +70,7 @@ void render(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(appData->program->identifier());
-	glBindBuffer(GL_ARRAY_BUFFER, appData->pbo);
+	glBindBuffer(GL_ARRAY_BUFFER, appData->pbo->identifier());
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -111,16 +112,14 @@ void initApplication(GLFWwindow* window)
 	appData->program->detachShader(*appData->fshader);
 	
 	const float vertexPositions[] = 
-		{
-			0.75f, 0.75f, 0.0f, 1.0f,
-			0.75f, -0.75f, 0.0f, 1.0f,
-			-0.75f, -0.75f, 0.0f, 1.0f,
-		};
+	{
+		0.75f, 0.75f, 0.0f, 1.0f,
+		0.75f, -0.75f, 0.0f, 1.0f,
+		-0.75f, -0.75f, 0.0f, 1.0f,
+	};
 
-	glGenBuffers(1, &appData->pbo);
-	glBindBuffer(GL_ARRAY_BUFFER, appData->pbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	appData->pbo = new gl::BufferObject<GLuint>(GL_STATIC_DRAW, vertexPositions, 
+		sizeof(vertexPositions));
 
 	glGenVertexArrays(1, &appData->vao);
 	glBindVertexArray(appData->vao);
@@ -135,5 +134,11 @@ int main(int argc, char* argv [])
 		gl::Program<GLuint> prog;
 		eventLoop(window);
 	}
+
+	delete appData->program;
+	delete appData->fshader;
+	delete appData->vshader;
+	delete appData;
+
 	glfwTerminate();
 }

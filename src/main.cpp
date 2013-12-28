@@ -72,10 +72,13 @@ void render(GLFWwindow* window)
 	glUseProgram(appData->program->identifier());
 	glBindBuffer(GL_ARRAY_BUFFER, appData->pbo->identifier());
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) 48);
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 	glUseProgram(0);
 }
 
@@ -111,15 +114,17 @@ void initApplication(GLFWwindow* window)
 	appData->program->detachShader(*appData->vshader);
 	appData->program->detachShader(*appData->fshader);
 	
-	const float vertexPositions[] = 
-	{
-		0.75f, 0.75f, 0.0f, 1.0f,
-		0.75f, -0.75f, 0.0f, 1.0f,
-		-0.75f, -0.75f, 0.0f, 1.0f,
+	const float vertexData[] = {
+		0.0f, 0.5f, 0.0f, 1.0f,
+		0.5f, -0.366f, 0.0f, 1.0f,
+		-0.5f, -0.366f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f,
 	};
 
-	appData->pbo = new gl::BufferObject<GLuint>(GL_STATIC_DRAW, vertexPositions, 
-		sizeof(vertexPositions));
+	appData->pbo = new gl::BufferObject<GLuint>(GL_STATIC_DRAW, vertexData,
+		sizeof(vertexData));
 
 	glGenVertexArrays(1, &appData->vao);
 	glBindVertexArray(appData->vao);
